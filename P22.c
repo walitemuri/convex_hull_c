@@ -165,39 +165,56 @@ double distance(Point a, Point b)
 
 void shortest_path(Point points[], int n, Point *best_path)
 {
-    int i, j, k;
-    Point curr_dist[MAX_POINTS];
-    double new_distance, best_distance = MAX_DISTANCE;
-    for (i = 0; i < n; i++)
+    double best_distance = MAX_DISTANCE;
+    int *path = (int *)malloc(n * sizeof(int));
+    bool *used = (bool *)calloc(n, sizeof(bool));
+
+    for (int i = 0; i < n; i++)
     {
-        for (j = i + 1; j < n; j++)
+        path[0] = i;
+        used[i] = true;
+        int curr = 1;
+        for (int j = 0; j < n - 1; j++)
         {
-            int current = 0;
-            curr_dist[current++] = points[i];
-            curr_dist[current++] = points[j];
-            for (k = 0; k < n; k++)
+            int curr_index = -1;
+            double curr_min = MAX_DISTANCE;
+            for (int k = 0; k < n; k++)
             {
-                if (k != i && k != j)
+                if (!used[k])
                 {
-                    curr_dist[current++] = points[k];
+                    double curr_distance = distance(points[path[j]], points[k]);
+                    if (curr_distance < curr_min)
+                    {
+                        curr_min = curr_distance;
+                        curr_index = k;
+                    }
                 }
             }
-            new_distance = 0;
-            for (k = 1; k < n; k++)
+            path[curr++] = curr_index;
+            used[curr_index] = true;
+        }
+        double curr_distance = 0;
+        for (int j = 1; j < n; j++)
+        {
+            curr_distance += distance(points[path[j - 1]], points[path[j]]);
+        }
+        if (curr_distance < best_distance)
+        {
+            best_distance = curr_distance;
+            for (int j = 0; j < n; j++)
             {
-                new_distance += distance(curr_dist[k - 1], curr_dist[k]);
-            }
-            if (new_distance < best_distance)
-            {
-                best_distance = new_distance;
-                for (k = 0; k < n; k++)
-                {
-                    best_path[k] = curr_dist[k];
-                }
+                best_path[j] = points[path[j]];
             }
         }
+        for (int j = 0; j < n; j++)
+        {
+            used[j] = false;
+        }
     }
+    free(path);
+    free(used);
 }
+
 int main(int argc, char *argv[])
 {
     Point *points = ReadPoints("data_A2_Q2.txt");
@@ -218,7 +235,7 @@ int main(int argc, char *argv[])
     printf("\nTotal Points: %d\n", quickCount);
     Point *bestPath = malloc(sizeof(Point) * 100);
     printf("\nShortest Path:\n");
-    qsort(convexHull, quickCount, sizeof(Point), comparePoints);
+
     shortest_path(convexHull, quickCount, bestPath);
 
     for (int i = 0; i < quickCount; i++)
@@ -228,4 +245,8 @@ int main(int argc, char *argv[])
 
     double elapsed = end.tv_sec - start.tv_sec + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
     printf("Elapsed time: %lf seconds\n", elapsed);
+
+    free(bestPath);
+    free(points);
+    free(convexHull);
 }
