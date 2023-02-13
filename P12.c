@@ -1,27 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 
 #define ROWS 10000
-
-long countInversionsBrute(long long *A, unsigned int n)
-{
-    long inv_count = 0;
-    unsigned int j = 0;
-    for (unsigned int i = 0; i < n - 1; i++)
-    {
-        for (unsigned int j = i + 1; j < n; j++)
-        {
-            if (A[i] > A[j])
-            {
-                inv_count++;
-            }
-        }
-    }
-
-    return inv_count;
-}
 
 long long countInversionsDiv(long long *A, unsigned int n)
 {
@@ -67,7 +48,7 @@ long long countInversionsDiv(long long *A, unsigned int n)
     return leftInv + rightInv + mergeInv;
 }
 
-long long *integerArray(char *fileName)
+long long *numsArray(char *fileName)
 {
     long long *arrayOfInts = malloc(sizeof(long long) * ROWS * 5);
     if (arrayOfInts == NULL)
@@ -97,21 +78,15 @@ long long *integerArray(char *fileName)
 int main(int argc, char *argv[])
 {
     long long *A;
-    A = integerArray("q1_data.dat");
-    clock_t begin = clock();
-    long count = countInversionsBrute(A, ROWS * 5);
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    A = numsArray("data_A2_Q1.txt");
+    struct timespec start, end;
 
-    printf("Number of Inversions: %ld\nTime Spent (Brute): %.3lfs\n", count, time_spent);
-    sleep(1);
-    printf("\n");
-    begin = clock();
-    count = countInversionsDiv(A, ROWS * 5);
-    end = clock();
-    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-    printf("Number of Inversions: %ld\nTime Spent (DIV/CONQ): %.3lfs\n", count, time_spent);
+    clock_gettime(CLOCK_REALTIME, &start);
+    long numOfInversions = countInversionsDiv(A, ROWS * 5);
+    printf("Number of inversions using Div/Conq: %ld\n", numOfInversions);
+    clock_gettime(CLOCK_REALTIME, &end);
+    double elapsed = end.tv_sec - start.tv_sec + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
+    printf("Elapsed time: %lf seconds\n", elapsed);
     free(A);
     return 0;
 }

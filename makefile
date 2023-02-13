@@ -1,16 +1,18 @@
 CC=gcc
 CFLAGS=-c -Wall -std=c99 -Wall -pedantic
 
-all: q1 q2 test
+all: P12 P11 P21 P22
+P11: P11.c
+	$(CC) P11.c -o P11
 
-q1: q1.c
-	$(CC) q1.c -o q1
+P12: P12.c
+	$(CC) P12.c -o P12
 
-q2: q2.c
-	$(CC) q2.c -o q2
+P21: P21.c
+	$(CC) P21.c -o P21
 
-test: test.c
-	$(CC) test.c -o test
+P22: P22.c
+	$(CC) P22.c -o P22
 
 clean:
-	rm -rf *o q1 q2 test
+	rm -rf *o P11 P12 P21 P22
