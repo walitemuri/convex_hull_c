@@ -180,84 +180,72 @@ double distance(Point a, Point b)
 }
 
 // This function finds the shortest path that connects all points in the input array
-void shortest_path(Point points[], int n, Point *best_path)
+// Given a list of extreme points of the convex hull, find the shortest path
+// from s1 to s2 along the hull
+void shortest_path(Point s1, Point s2, Point *hull, int n)
 {
-    // Initialize the best distance to the maximum possible distance
-    double best_distance = MAX_DISTANCE;
+    int i, j;
+    double dist, min_dist = INFINITY;
 
-    int *path = (int *)malloc(n * sizeof(int));
-    bool *used = (bool *)calloc(n, sizeof(bool));
-
-    // For each point as a starting point in the path
-    for (int i = 0; i < n; i++)
+    // Find the indices of s1 and s2 in the hull
+    int i1 = -1, i2 = -1;
+    for (i = 0; i < n; i++)
     {
-        // Set the first point in the path to the current point
-        path[0] = i;
-
-        // Mark the current point as visited
-        used[i] = true;
-
-        // Initialize the current index to 1
-        int curr = 1;
-
-        // For each remaining point in the path
-        for (int j = 0; j < n - 1; j++)
-        {
-            // Initialize the current index and minimum distance to invalid values
-            int curr_index = -1;
-            double curr_min = MAX_DISTANCE;
-
-            // For each unused point
-            for (int k = 0; k < n; k++)
-            {
-                if (!used[k])
-                {
-                    // Compute the distance between the current point and the unused point
-                    double curr_distance = distance(points[path[j]], points[k]);
-
-                    // If the distance is less than the minimum distance found so far,
-                    // update the minimum distance and current index
-                    if (curr_distance < curr_min)
-                    {
-                        curr_min = curr_distance;
-                        curr_index = k;
-                    }
-                }
-            }
-
-            // Add the closest unused point to the path and mark it as visited
-            path[curr++] = curr_index;
-            used[curr_index] = true;
-        }
-
-        // Compute the total distance of the current path
-        double curr_distance = 0;
-        for (int j = 1; j < n; j++)
-        {
-            curr_distance += distance(points[path[j - 1]], points[path[j]]);
-        }
-
-        // If the current path is shorter than the best path found so far,
-        // update the best path and the best distance
-        if (curr_distance < best_distance)
-        {
-            best_distance = curr_distance;
-            for (int j = 0; j < n; j++)
-            {
-                best_path[j] = points[path[j]];
-            }
-        }
-
-        // Reset the used array for the next starting point
-        for (int j = 0; j < n; j++)
-        {
-            used[j] = false;
-        }
+        if (hull[i].x == s1.x && hull[i].y == s1.y)
+            i1 = i;
+        if (hull[i].x == s2.x && hull[i].y == s2.y)
+            i2 = i;
     }
-    free(path);
-    free(used);
-}
 
+    // Allocate an array to store the shortest path points
+    Point *path = (Point *)malloc(n * sizeof(Point));
+
+    // Traverse the hull in both directions from s1 to s2
+    int path_len = 0;
+    i = i1;
+    j = i2;
+    while (i != j)
+    {
+        // Add the current point on the hull to the path
+        path[path_len++] = hull[i];
+
+        // Compute the length of the current segment of the hull
+        dist = distance(hull[i], hull[(i + 1) % n]);
+
+        // Check if the current segment is shorter than the current minimum
+        if (dist < min_dist)
+            min_dist = dist;
+
+        // Move to the next point on the hull in the clockwise direction
+        i = (i + 1) % n;
+    }
+    // Add the last point on the hull to the path
+    path[path_len++] = hull[i];
+
+    // Traverse the hull in the opposite direction from s2 to s1
+    j = i2;
+    while (j != i)
+    {
+        // Add the current point on the hull to the path
+        path[path_len++] = hull[j];
+
+        // Compute the length of the current segment of the hull
+        dist = distance(hull[j], hull[(j + 1) % n]);
+
+        // Check if the current segment is shorter than the current minimum
+        if (dist < min_dist)
+            min_dist = dist;
+
+        // Move to the next point on the hull in the counterclockwise direction
+        j = (j + n - 1) % n;
+    }
+
+    // Print the shortest path points
+    printf("Shortest path from (%g, %g) to (%g, %g):\n", s1.x, s1.y, s2.x, s2.y);
+    for (i = 0; i < path_len; i++)
+        printf("(%g, %g)\n", path[i].x, path[i].y);
+    printf("Length: %g\n", min_dist);
+}
 /* Main function */
 int main(int argc, char *argv[])
 {
@@ -280,12 +268,15 @@ int main(int argc, char *argv[])
     Point *bestPath = malloc(sizeof(Point) * 100);
     printf("\nShortest Path:\n");
 
-    shortest_path(convexHull, quickCount, bestPath);
+    Point p1;
+    Point p2;
 
-    for (int i = 0; i < quickCount; i++)
-    {
-        printf("(%lf, %lf)\n", bestPath[i].x, bestPath[i].y);
-    }
+    printf("Enter s1 x and y seperated by space:\n");
+    scanf(" %lf %lf", &p1.x, &p1.y);
+    printf("Enter s2 x and y seperated by space:\n");
+    scanf(" %lf %lf", &p2.x, &p2.y);
+
+    shortest_path(p1, p2, convexHull, quickCount);
 
     double elapsed = end.tv_sec - start.tv_sec + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
     printf("Elapsed time: %lf seconds\n", elapsed);
