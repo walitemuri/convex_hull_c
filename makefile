@@ -9,10 +9,10 @@ P12: P12.c
 	$(CC) P12.c -o P12
 
 P21: P21.c
-	$(CC) P21.c -o P21
+	$(CC) P21.c -o P21 -lm
 
 P22: P22.c
-	$(CC) P22.c -o P22
+	$(CC) P22.c -o P22 -lm
 
 clean:
 	rm -rf *o P11 P12 P21 P22
