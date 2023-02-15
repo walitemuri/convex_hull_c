@@ -13,24 +13,18 @@ typedef struct Point
     double x, y;
 } Point;
 
+/* Helper Function which evaluates which side of the line the points is located */
 bool IsOnSameSide(Point p1, Point p2, Point p3)
 {
     return ((p3.y - p1.y) * (p2.x - p1.x) - (p3.x - p1.x) * (p2.y - p1.y)) < 0;
 }
 
-int comparePoints(const void *a, const void *b)
-{
-    Point *p1 = (Point *)a;
-    Point *p2 = (Point *)b;
-
-    if (p1->x < p2->x)
-        return -1;
-    else if (p1->x > p2->x)
-        return 1;
-    else
-        return 0;
-}
-
+/*
+Function: ReadPoitns
+In: filename
+Out: Ponint * points
+Post: Returns address of points array containing all the points in file
+*/
 Point *ReadPoints(char *filename)
 {
     Point *points = (Point *)malloc(sizeof(Point) * MAX_POINTS);
@@ -60,6 +54,12 @@ Point *ReadPoints(char *filename)
     return points;
 }
 
+/*
+Function: BruteHull
+In: Point * points, unsigned int n, int * bruteCount
+Out: Point *convexHull
+Post: Returns an array of points containing the convex hull points
+*/
 Point *BruteHull(Point *points, unsigned int n, int *bruteCount)
 {
     Point *convexHull = NULL;
@@ -115,6 +115,7 @@ Point *BruteHull(Point *points, unsigned int n, int *bruteCount)
     return convexHull;
 }
 
+/* Helper function in order to calculate distance using simple geometery rules */
 double distance(Point a, Point b)
 {
     double dx = a.x - b.x;
@@ -122,26 +123,44 @@ double distance(Point a, Point b)
     return sqrt(dx * dx + dy * dy);
 }
 
+// This function finds the shortest path that connects all points in the input array
 void shortest_path(Point points[], int n, Point *best_path)
 {
+    // Initialize the best distance to the maximum possible distance
     double best_distance = MAX_DISTANCE;
+
     int *path = (int *)malloc(n * sizeof(int));
     bool *used = (bool *)calloc(n, sizeof(bool));
 
+    // For each point as a starting point in the path
     for (int i = 0; i < n; i++)
     {
+        // Set the first point in the path to the current point
         path[0] = i;
+
+        // Mark the current point as visited
         used[i] = true;
+
+        // Initialize the current index to 1
         int curr = 1;
+
+        // For each remaining point in the path
         for (int j = 0; j < n - 1; j++)
         {
+            // Initialize the current index and minimum distance to invalid values
             int curr_index = -1;
             double curr_min = MAX_DISTANCE;
+
+            // For each unused point
             for (int k = 0; k < n; k++)
             {
                 if (!used[k])
                 {
+                    // Compute the distance between the current point and the unused point
                     double curr_distance = distance(points[path[j]], points[k]);
+
+                    // If the distance is less than the minimum distance found so far,
+                    // update the minimum distance and current index
                     if (curr_distance < curr_min)
                     {
                         curr_min = curr_distance;
@@ -149,14 +168,21 @@ void shortest_path(Point points[], int n, Point *best_path)
                     }
                 }
             }
+
+            // Add the closest unused point to the path and mark it as visited
             path[curr++] = curr_index;
             used[curr_index] = true;
         }
+
+        // Compute the total distance of the current path
         double curr_distance = 0;
         for (int j = 1; j < n; j++)
         {
             curr_distance += distance(points[path[j - 1]], points[path[j]]);
         }
+
+        // If the current path is shorter than the best path found so far,
+        // update the best path and the best distance
         if (curr_distance < best_distance)
         {
             best_distance = curr_distance;
@@ -165,6 +191,8 @@ void shortest_path(Point points[], int n, Point *best_path)
                 best_path[j] = points[path[j]];
             }
         }
+
+        // Reset the used array for the next starting point
         for (int j = 0; j < n; j++)
         {
             used[j] = false;

@@ -13,6 +13,12 @@ typedef struct Point
     double x, y;
 } Point;
 
+/*
+Function: ReadPoints
+In: char * filename
+Out: Point * points
+Post: Read points from file and populates array of points
+*/
 Point *ReadPoints(char *filename)
 {
     Point *points = (Point *)malloc(sizeof(Point) * MAX_POINTS);
@@ -42,6 +48,12 @@ Point *ReadPoints(char *filename)
     return points;
 }
 
+/*
+Function: findLeftMost
+In: Point * points, int count
+Out: Point leftMost
+Post: Iterates through the array of points to locate the
+*/
 Point findLeftMost(Point *points, int count)
 {
     Point leftMost = points[0];
@@ -55,6 +67,12 @@ Point findLeftMost(Point *points, int count)
     return leftMost;
 }
 
+/*
+Function: findRightMost
+In: Point * points, int count
+Out: Point rightMost
+Post: Iterates through the points and finds the rightmost point
+*/
 Point findRightMost(Point *points, int count)
 {
     Point rightMost = points[0];
@@ -68,16 +86,19 @@ Point findRightMost(Point *points, int count)
     return rightMost;
 }
 
+/* Helper function to calculate the cross product */
 double crossProduct(Point A, Point B, Point C)
 {
     return (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
 }
 
+/* Recursive function desigend to find the points in the upper half of the plane */
 int upperHull(Point *points, Point *convexHull, int count, Point A, Point B, int quickIndex)
 {
     int maxIndex = 0;
     double maxDistance = 0;
 
+    // Finding max distance point from the line
     for (int i = 0; i < count; i++)
     {
         double distance = crossProduct(A, B, points[i]);
@@ -99,6 +120,7 @@ int upperHull(Point *points, Point *convexHull, int count, Point A, Point B, int
     return quickIndex;
 }
 
+/* Recursive function desigend to find the points in the lower half of the plane */
 int lowerHull(Point *points, Point *convexHull, int count, Point A, Point B, int quickIndex)
 {
     int maxIndex = 0;
@@ -125,6 +147,12 @@ int lowerHull(Point *points, Point *convexHull, int count, Point A, Point B, int
     return quickIndex;
 }
 
+/*
+Function: quickHull
+In: Point * points, Point * convexHull, int count
+Out: int quickIndex
+Post: Finds the convex hull by recursively finding the upper and lower hulls
+*/
 int quickHull(Point *points, Point *convexHull, int count)
 {
     Point leftMost = findLeftMost(points, count);
@@ -143,19 +171,7 @@ int quickHull(Point *points, Point *convexHull, int count)
     return quickIndex;
 }
 
-int comparePoints(const void *a, const void *b)
-{
-    Point *p1 = (Point *)a;
-    Point *p2 = (Point *)b;
-
-    if (p1->x < p2->x)
-        return -1;
-    else if (p1->x > p2->x)
-        return 1;
-    else
-        return 0;
-}
-
+/* Helper function to calculate distance */
 double distance(Point a, Point b)
 {
     double dx = a.x - b.x;
@@ -163,26 +179,44 @@ double distance(Point a, Point b)
     return sqrt(dx * dx + dy * dy);
 }
 
+// This function finds the shortest path that connects all points in the input array
 void shortest_path(Point points[], int n, Point *best_path)
 {
+    // Initialize the best distance to the maximum possible distance
     double best_distance = MAX_DISTANCE;
+
     int *path = (int *)malloc(n * sizeof(int));
     bool *used = (bool *)calloc(n, sizeof(bool));
 
+    // For each point as a starting point in the path
     for (int i = 0; i < n; i++)
     {
+        // Set the first point in the path to the current point
         path[0] = i;
+
+        // Mark the current point as visited
         used[i] = true;
+
+        // Initialize the current index to 1
         int curr = 1;
+
+        // For each remaining point in the path
         for (int j = 0; j < n - 1; j++)
         {
+            // Initialize the current index and minimum distance to invalid values
             int curr_index = -1;
             double curr_min = MAX_DISTANCE;
+
+            // For each unused point
             for (int k = 0; k < n; k++)
             {
                 if (!used[k])
                 {
+                    // Compute the distance between the current point and the unused point
                     double curr_distance = distance(points[path[j]], points[k]);
+
+                    // If the distance is less than the minimum distance found so far,
+                    // update the minimum distance and current index
                     if (curr_distance < curr_min)
                     {
                         curr_min = curr_distance;
@@ -190,14 +224,21 @@ void shortest_path(Point points[], int n, Point *best_path)
                     }
                 }
             }
+
+            // Add the closest unused point to the path and mark it as visited
             path[curr++] = curr_index;
             used[curr_index] = true;
         }
+
+        // Compute the total distance of the current path
         double curr_distance = 0;
         for (int j = 1; j < n; j++)
         {
             curr_distance += distance(points[path[j - 1]], points[path[j]]);
         }
+
+        // If the current path is shorter than the best path found so far,
+        // update the best path and the best distance
         if (curr_distance < best_distance)
         {
             best_distance = curr_distance;
@@ -206,6 +247,8 @@ void shortest_path(Point points[], int n, Point *best_path)
                 best_path[j] = points[path[j]];
             }
         }
+
+        // Reset the used array for the next starting point
         for (int j = 0; j < n; j++)
         {
             used[j] = false;
@@ -215,6 +258,7 @@ void shortest_path(Point points[], int n, Point *best_path)
     free(used);
 }
 
+/* Main function */
 int main(int argc, char *argv[])
 {
     Point *points = ReadPoints("data_A2_Q2.txt");

@@ -4,6 +4,12 @@
 
 #define ROWS 10000
 
+/*
+Function: countInversionsDiv
+In: long long * A, unsigned int n
+Out: long long rightInv + leftInv +mergeInv
+Post: Returns number of Inversions in array using Divide and Conquer
+*/
 long long countInversionsDiv(long long *A, unsigned int n)
 {
     if (n <= 1)
@@ -48,10 +54,16 @@ long long countInversionsDiv(long long *A, unsigned int n)
     return leftInv + rightInv + mergeInv;
 }
 
+/*
+Function: numsArray
+In: char * fileName
+Out: long long * arrayOfNums
+Post: Returns array of numbers read from the file.
+*/
 long long *numsArray(char *fileName)
 {
-    long long *arrayOfInts = malloc(sizeof(long long) * ROWS * 5);
-    if (arrayOfInts == NULL)
+    long long *arrayOfNums = malloc(sizeof(long long) * ROWS * 5);
+    if (arrayOfNums == NULL)
     {
         printf("Error: Couldn't allocate memory for array\n");
         exit(-1);
@@ -60,21 +72,22 @@ long long *numsArray(char *fileName)
     FILE *f = fopen(fileName, "r");
     if (f == NULL)
     {
-        free(arrayOfInts);
+        free(arrayOfNums);
         printf("Error: Couldn't open file '%s'\n", fileName);
         exit(-1);
     }
 
     unsigned int i = 0;
-    while (fscanf(f, "%lld", &arrayOfInts[i]) == 1)
+    while (fscanf(f, "%lld", &arrayOfNums[i]) == 1)
     {
         i++;
     }
 
     fclose(f);
-    return arrayOfInts;
+    return arrayOfNums;
 }
 
+/* Main function */
 int main(int argc, char *argv[])
 {
     long long *A;
