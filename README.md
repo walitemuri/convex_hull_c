@@ -1,6 +1,6 @@
-## CIS-3490 A2
+## Convex Hull Algorithms
 
-Wali Temuri, 1183379
+Wali Temuri
 
 ## Description
 
